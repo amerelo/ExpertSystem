@@ -1,0 +1,6 @@
+[package]
+name = "expertsystem"
+version = "0.1.0"
+authors = ["amerelo"]
+
+[dependencies]
