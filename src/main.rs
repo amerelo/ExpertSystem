@@ -1,30 +1,37 @@
+mod parser_module;
+
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashSet;
-mod parser_module;
-
-
 use parser_module::parser::Parser;
-/*
-enum Element {
-    Fact(Node),
-    Rule(Node),
+
+struct Rule {
+    name: String,
 }
-*/
-struct Node {
+
+struct Fact {
+    name: String,
+}
+
+enum Types {
+    Fac(Fact),
+    Rul(Rule),
+}
+
+struct Element {
     datum: &'static str,
     dattype: &'static str,
-    edges: Vec<Rc<RefCell<Node>>>,
+    edges: Vec<Rc<RefCell<Element>>>,
+    classe: Types,
 }
 
-
-
-impl Node {
-    fn new(datum: &'static str, dattype: &'static str) -> Rc<RefCell<Node>> {
-        Rc::new(RefCell::new(Node {
+impl Element {
+    fn new(datum: &'static str, dattype: &'static str, elem: Types) -> Rc<RefCell<Element>> {
+        Rc::new(RefCell::new(Element {
             datum: datum,
             dattype: dattype,
             edges: Vec::new(),
+            classe: elem,
         }))
     }
 
@@ -41,26 +48,27 @@ impl Node {
         }
     }
 
-    fn first(&self) -> Rc<RefCell<Node>> {
+    fn first(&self) -> Rc<RefCell<Element>> {
         self.edges[0].clone()
     }
-    fn second(&self) -> Rc<RefCell<Node>> {
+    fn second(&self) -> Rc<RefCell<Element>> {
         self.edges[1].clone()
     }
 }
 
-fn foo(node: &Node) {
+
+fn foo(node: &Element) {
     println!("foo:datnum: {} dattype:{}", node.datum, node.dattype);
 }
 
-fn init() -> Rc<RefCell<Node>> {
-    let root = Node::new("A", "ALPHA");
+fn init() -> Rc<RefCell<Element>> {
+    let root = Element::new("A", "ALPHA", Types::Fac(Fact{name: "toto".to_string() }) );
 
-    let b = Node::new("B", "Beta");
-    let c = Node::new("C", "Charly");
-    let d = Node::new("D", "Delta");
-    let e = Node::new("E", "Epsilon");
-    let f = Node::new("F", "FALSE");
+    let b = Element::new("B", "Beta", Types::Fac(Fact{name: "toto".to_string() }) );
+    let c = Element::new("C", "Charly", Types::Fac(Fact{name: "toto".to_string() }) );
+    let d = Element::new("D", "Delta", Types::Fac(Fact{name: "toto".to_string() }) );
+    let e = Element::new("E", "Epsilon", Types::Fac(Fact{name: "toto".to_string() }) );
+    let f = Element::new("F", "FALSE", Types::Fac(Fact{name: "toto".to_string() }) );
 
     {
         let mut mut_root = root.borrow_mut();
