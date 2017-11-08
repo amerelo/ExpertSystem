@@ -1,15 +1,23 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashSet;
-use std::env;
-use std::fs::File;
-use std::io::prelude::*;
+mod parser_module;
 
+
+use parser_module::parser::Parser;
+/*
+enum Element {
+    Fact(Node),
+    Rule(Node),
+}
+*/
 struct Node {
     datum: &'static str,
     dattype: &'static str,
     edges: Vec<Rc<RefCell<Node>>>,
 }
+
+
 
 impl Node {
     fn new(datum: &'static str, dattype: &'static str) -> Rc<RefCell<Node>> {
@@ -70,31 +78,17 @@ fn init() -> Rc<RefCell<Node>> {
 }
 
 pub fn main() {
-
     let g = init();
     let g = g.borrow();
-    g.traverse(&|d| println!("{}", d), &mut HashSet::new());
+        g.traverse(&|d| println!("{}", d), &mut HashSet::new());
     let f = g.first();
     foo(&*f.borrow());
     let h = g.second();
     foo(&*h.borrow());
 
+    let lines: Vec<String> = Parser::parse();
 
-    let args: Vec<_> = env::args().collect();
-    if args.len() > 1 {
-        println!("The first argument is {}", args[1]);
+    for line in lines {
+        println!("{}", line);
     }
-	
-
-	println!("In file {}", args[1]);
-
-    let mut f = File::open(&args[1]).expect("file not found");
-
-    let mut contents = String::new();
-    f.read_to_string(&mut contents)
-        .expect("something went wrong reading the file");
-
-    println!("With text:\n{}", contents);
-
-	
 }
