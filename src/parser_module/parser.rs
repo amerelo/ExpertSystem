@@ -3,6 +3,7 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
+#[derive(Debug)]
 pub struct Node {
 	pub rules: String,
 	pub facts: String,

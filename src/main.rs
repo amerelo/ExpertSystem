@@ -109,8 +109,8 @@ fn start_node(g: &Element)
 }
 
 pub fn main() {
-	// let tmp = init();
-	// start_node(&*tmp.borrow());
+	let tmp = init();
+	start_node(&*tmp.borrow());
 	let mut lines: Vec<String> = vec![];
 
 	let mut pars:  Parser = Parser{node: vec![], val_init: vec![], val_search: vec![] };
@@ -119,10 +119,7 @@ pub fn main() {
 		Ok(elem) => lines = elem,
 		Err(e) => println!("{}", e),
 	}
+	Rpn::prefixparse(&mut pars);
 
 
-	let source = String::from("(!(B + E) |(A + !B)) + D");
-	let output = Rpn::prefix(source);
-
-	println!("{}", output);
 }

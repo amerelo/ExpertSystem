@@ -1,3 +1,4 @@
+use parser_module::parser::Parser;
 
 pub struct Rpn {
 
@@ -5,7 +6,7 @@ pub struct Rpn {
 
 impl Rpn
 {
-    pub fn prefix(source : String) -> String {
+    pub fn prefix(source : &String) -> String {
 
         let tokens : Vec<char> = source.chars().collect();
         let mut opstack : Vec<char> = vec![];
@@ -58,6 +59,15 @@ impl Rpn
 
         let s: String = output.into_iter().collect();
         s
+    }
+
+    pub fn prefixparse(pars : &mut Parser) {
+        for nod in pars.node.iter_mut() {
+
+            nod.rules = Rpn::prefix(&nod.rules);
+            nod.facts = Rpn::prefix(&nod.facts);
+            println!("{:?}", nod);
+        }
     }
 }
 
