@@ -1,26 +1,38 @@
 mod parser_module;
 
+use std::io;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashSet;
 use parser_module::parser::Parser;
-
-struct Rule {
-	name: String,
-}
-
-struct Fact {
-	name: String,
-}
 
 enum Types {
 	Fac(Fact),
 	Rul(Rule),
 }
 
+enum Operator {
+	Not,
+	And,
+	Or,
+	Xor,
+}
+
+struct Rule {
+	op: Operator,
+	edges: Vec<Rc<RefCell<Element>>>,
+}
+
+struct Fact {
+	name: String,
+	valid: bool,
+	invalid: bool,
+}
+
 struct Element {
 	datum: &'static str,
 	dattype: &'static str,
+
 	edges: Vec<Rc<RefCell<Element>>>,
 	classe: Types,
 }
@@ -56,19 +68,19 @@ impl Element {
 	}
 }
 
-
 fn foo(node: &Element) {
 	println!("foo:datnum: {} dattype:{}", node.datum, node.dattype);
 }
 
 fn init() -> Rc<RefCell<Element>> {
-	let root = Element::new("A", "ALPHA", Types::Fac(Fact{name: "toto".to_string() }) );
 
-	let b = Element::new("B", "Beta", Types::Fac(Fact{name: "toto".to_string() }) );
-	let c = Element::new("C", "Charly", Types::Fac(Fact{name: "toto".to_string() }) );
-	let d = Element::new("D", "Delta", Types::Fac(Fact{name: "toto".to_string() }) );
-	let e = Element::new("E", "Epsilon", Types::Fac(Fact{name: "toto".to_string() }) );
-	let f = Element::new("F", "FALSE", Types::Fac(Fact{name: "toto".to_string() }) );
+	let root = Element::new("A", "ALPHA", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
+
+	let b = Element::new("B", "Beta", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
+	let c = Element::new("C", "Charly", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
+	let d = Element::new("D", "Delta", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
+	let e = Element::new("E", "Epsilon", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
+	let f = Element::new("F", "FALSE", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
 
 	{
 		let mut mut_root = root.borrow_mut();
@@ -79,24 +91,28 @@ fn init() -> Rc<RefCell<Element>> {
 		let mut mut_c = c.borrow_mut();
 		mut_c.edges.push(e.clone());
 		mut_c.edges.push(f.clone());
-		mut_c.edges.push(root.clone());
+		// mut_c.edges.push(root.clone());
 	}
 
 	root
 }
 
-pub fn main() {
-	let g = init();
-	let g = g.borrow();
+fn start_node(g: &Element)
+{
 	g.traverse(&|d| println!("{}", d), &mut HashSet::new());
 	let f = g.first();
 	foo(&*f.borrow());
 	let h = g.second();
 	foo(&*h.borrow());
+}
 
-	let lines: Vec<String> = Parser::parse();
+pub fn main() {
+	// let tmp = init();
+	// start_node(&*tmp.borrow());
+	let mut lines: Vec<String> = vec![];
 
-	for line in lines {
-		println!("{}", line);
+	match Parser::parse() {
+		Ok(elem) => lines = elem,
+		Err(e) => println!("{}", e),
 	}
 }
