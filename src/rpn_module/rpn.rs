@@ -12,10 +12,15 @@ impl Rpn
         let mut output : Vec<char> = vec![];
 
         let mut opshit = 0;
-
+        let mut alphashit = 0;
         for token in tokens {
             if token.is_alphabetic()
             {
+                if (alphashit > 0)
+                {
+                    return String::from("WTF ALPHA");
+                }
+                alphashit += 1;
                 opshit = 0;
                 output.push(token.clone());
             }
@@ -33,9 +38,11 @@ impl Rpn
             }
             else if isoperator(token)
             {
-                if opshit > 0 {
-                    println!("Fuck you ass hole, you want to kill me ?");
-                    return String::from("WTF");
+                if !token.eq(&'!') {
+                    alphashit = 0;
+                }
+                if opshit > 0 && !token.eq(&'!') {
+                    return String::from("WTF OPERAND");
                 }
                 opshit += 1;
                 while opstack.len() > 0 && opprec(peekop(&opstack)) >= opprec(token) {

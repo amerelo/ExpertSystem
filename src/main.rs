@@ -120,7 +120,7 @@ pub fn main() {
 
 	let mut pars:  Parser = Parser{node: vec![], val_init: vec![], val_search: vec![] };
 
-	let source = String::from("(A + B) | D");
+	let source = String::from("(!(B + E) |(A + !B)) + D");
 	let output = Rpn::prefix(source);
 
 	println!("{}", output);
