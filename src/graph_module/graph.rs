@@ -6,7 +6,7 @@ use parser_module::parser::Parser;
 pub enum Types {
 	Fac(Fact),
 	Rul(Rule),
-    None,
+	None,
 }
 
 pub enum Operator {
@@ -19,8 +19,7 @@ pub enum Operator {
 pub struct Rule {
 	pub op: Operator,
 
-    pub content:String,
-	//pub edges: Vec<Rc<RefCell<Node>>>,
+	pub content:String,
 }
 
 pub struct Fact {
@@ -30,17 +29,17 @@ pub struct Fact {
 }
 
 pub struct Node {
-    pub name: String,
+	pub name: String,
 	pub classe: Types,
-    pub edges: Vec<Rc<RefCell<Node>>>,
+	pub edges: Vec<Rc<RefCell<Node>>>,
 }
 
 impl Node {
 	pub fn new( name: String, classe: Types) -> Rc<RefCell<Node>> {
 		Rc::new(RefCell::new(Node {
-            name: name,
+			name: name,
 			classe: classe,
-            edges: Vec::new(),
+			edges: Vec::new(),
 		}))
 	}
 
@@ -54,7 +53,7 @@ impl Node {
 		f(self.name.clone());
 		seen.insert(self.name.clone());
 
-        for n in &self.edges {
+		for n in &self.edges {
 			n.borrow().traverse(f, seen);
 		}
 	}
@@ -62,21 +61,37 @@ impl Node {
 	pub fn first(&self) -> Rc<RefCell<Node>> {
 		self.edges[0].clone()
 	}
+
 	pub fn second(&self) -> Rc<RefCell<Node>> {
 		self.edges[1].clone()
 	}
 
-    pub fn generate(&self, data : &mut Parser) {
-        for elem in data.node.iter(){
-            println!("elem > {:?}", elem);
-            for item in elem.rules.chars() {
-                println!("rules > {:?}", item);
-                if item.is_alphabetic() {
-                    let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
-                }
-            }
-        }
-     }
+	pub fn generate(&mut self, data : &mut Parser) {
+		for elem in data.node.iter(){
+			println!("elem > {:?}", elem);
+			for item in elem.rules.chars() {
+				println!("rules > {:?}", item);
+				if item.is_alphabetic() {
+					let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
+					self.edges.push(tmp.clone());
+				}
+			}
+		}
+		self.start_node();
+	}
+
+	pub fn foo(&self, node: &Node) {
+		println!("name: {}", node.name);
+	}
+
+	pub fn start_node(&self)
+	{
+		self.traverse(&|d| println!("{}", d), &mut HashSet::new());
+		let f = self.first();
+		self.foo(&*f.borrow());
+		let h = self.second();
+		self.foo(&*h.borrow());
+	}
 }
 
 
