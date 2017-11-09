@@ -32,10 +32,8 @@ impl Parser
 	fn declaration_is_valid(&mut self, line: &String, t: char) -> bool
 	{
 		for (i, elem) in line.chars().enumerate() {
-			if i == 0 && elem != t {
-				println!("Error bad bormat {}", line);
-				return false;
-			} else if elem.is_alphabetic() {
+			if i == 0 && elem == t {}
+			else if elem.is_alphabetic() {
 				self.val_init.push(elem.to_string().clone());
 			} else {
 				println!("Error bad bormat {}", line);
@@ -52,7 +50,7 @@ impl Parser
 			let mut node2: Node = Node{ rules: String::from(""), facts: String::from("") };
 
 			if let Some(val) = line.find("<=>") {
-				line.split("<>=>").enumerate().for_each(|x|
+				line.split("<=>").enumerate().for_each(|x|
 					if x.0 == 2 {
 						println!("Error more than 2 |<=>| in line >  {}", line);
 						node.rules = String::from("");
@@ -90,7 +88,7 @@ impl Parser
 					return false;
 				}
 			} else if let Some(val) = line.find("?") {
-				if self.declaration_is_valid(& line, '?') {
+				if !self.declaration_is_valid(& line, '?') {
 					println!("Error bad format for line >  {:?}", line);
 					return false;
 				}
