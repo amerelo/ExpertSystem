@@ -63,10 +63,8 @@ impl Rpn
 
     pub fn prefixparse(pars : &mut Parser) {
         for nod in pars.node.iter_mut() {
-
             nod.rules = Rpn::prefix(&nod.rules);
             nod.facts = Rpn::prefix(&nod.facts);
-            println!("{:?}", nod);
         }
     }
 }
