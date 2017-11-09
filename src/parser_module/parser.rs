@@ -5,14 +5,14 @@ use std::io::prelude::*;
 
 
 pub struct Node {
-	Rules: String,
-	Facts: String,
+	pub Rules: String,
+	pub Facts: String,
 }
 
 pub struct Parser {
-	node: Vec<Node>,
-	val_init: Vec<String>,
-	val_search: Vec<String>,
+	pub node: Vec<Node>,
+	pub val_init: Vec<String>,
+	pub val_search: Vec<String>,
 }
 
 impl Parser

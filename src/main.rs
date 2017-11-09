@@ -1,10 +1,12 @@
 mod parser_module;
+mod rpn_module;
 
 use std::io;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashSet;
 use parser_module::parser::Parser;
+use rpn_module::rpn::Rpn;
 
 enum Types {
 	Fac(Fact),
@@ -115,4 +117,11 @@ pub fn main() {
 		Ok(elem) => lines = elem,
 		Err(e) => println!("{}", e),
 	}
+
+	let mut pars:  Parser = Parser{node: vec![], val_init: vec![], val_search: vec![] };
+
+	let source = String::from("(A + B) | D");
+	let output = Rpn::prefix(source);
+
+	println!("{}", output);
 }
