@@ -89,15 +89,15 @@ impl Node {
 		let mut node_c = self.get_node_by_name(node2);
 		let mut node_p = self.get_node_by_name(node1);
 
+		// set struct Fact valid to true
+		match node_c.borrow_mut().classe {
+			Types::Fac(ref mut fact) => fact.valid = true,
+			Types::Rul(ref mut rul) => println!("rul -> {:?}", rul),
+			Types::None => println!("None"),
+		}
+
 		node_p.borrow_mut().edges.push(node_c.clone());
 	}
-
-	// pub fn first(&self) -> Rc<RefCell<Node>> {
-	// 	self.edges[0].clone()
-	// }
-	// pub fn second(&self) -> Rc<RefCell<Node>> {
-	// 	self.edges[1].clone()
-	// }
 
 	pub fn generate(&mut self, data : &mut Parser) {
 		for elem in data.node.iter() {
@@ -108,9 +108,12 @@ impl Node {
 					let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
 					self.edges.push(tmp.clone());
 
+
+					// test init list A in C
 					if item == 'A'{
 						self.insert_node(String::from("A"), String::from("C"));
 					}
+					// test init list C in W
 					if item == 'W'{
 						self.insert_node(String::from("C"), String::from("W"));
 					}
@@ -119,10 +122,6 @@ impl Node {
 		}
 		self.start_node();
 	}
-
-	// pub fn foo(&self, node: &Node) {
-	// 	println!("name: {}", node.name);
-	// }
 
 	pub fn start_node(&self)
 	{
@@ -136,6 +135,17 @@ impl Node {
 		// let h = self.second();
 		// self.foo(&*h.borrow());
 	}
+
+	// pub fn first(&self) -> Rc<RefCell<Node>> {
+	// 	self.edges[0].clone()
+	// }
+	// pub fn second(&self) -> Rc<RefCell<Node>> {
+	// 	self.edges[1].clone()
+	// }
+
+	// pub fn foo(&self, node: &Node) {
+	// 	println!("name: {}", node.name);
+	// }
 }
 
 // pub fn init() -> Rc<RefCell<Node>> {
