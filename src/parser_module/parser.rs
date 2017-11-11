@@ -50,7 +50,7 @@ impl Parser
 			let mut node: Node = Node{ rules: String::from(""), facts: String::from("") };
 			let mut node2: Node = Node{ rules: String::from(""), facts: String::from("") };
 
-			if let Some(val) = line.find("<=>") {
+			if let Some(_val) = line.find("<=>") {
 				line.split("<=>").enumerate().for_each(|x|
 					if x.0 == 2 {
 						println!("Error more than 2 |<=>| in line >  {}", line);
@@ -68,7 +68,7 @@ impl Parser
 				node2.facts = node.rules.clone();
 				self.node.push(node);
 				self.node.push(node2);
-			} else if let Some(val) = line.find("=>") {
+			} else if let Some(_val) = line.find("=>") {
 				line.split("=>").enumerate().for_each(|x|
 					if x.0 == 2 {
 						println!("Error more than 2 |=>| in line >  {}", line);
@@ -83,12 +83,12 @@ impl Parser
 						return false;
 				}
 				self.node.push(node);
-			} else if let Some(val) = line.find("=") {
+			} else if let Some(_val) = line.find("=") {
 				if !self.declaration_is_valid(& line, '='){
 					println!("Error bad format for line >  {:?}", line);
 					return false;
 				}
-			} else if let Some(val) = line.find("?") {
+			} else if let Some(_val) = line.find("?") {
 				if !self.declaration_is_valid(& line, '?') {
 					println!("Error bad format for line >  {:?}", line);
 					return false;
@@ -101,7 +101,7 @@ impl Parser
 		return true;
 	}
 
-	pub fn parse(&mut self) -> Result<Vec<String>, io::Error>
+	pub fn parse(&mut self) -> Result<bool, io::Error>
 	{
 		let args: Vec<String> = env::args().collect();
 		if args.len() > 1 {
@@ -118,10 +118,10 @@ impl Parser
 						end.push(x.1.trim().clone().to_string())
 					});
 			}
-			if self.validator(&mut end) {
-				return Ok(end);
+			if !self.validator(&mut end) {
+				return Err(io::Error::new(io::ErrorKind::Other, "File bad format"));
 			}
-			return Err(io::Error::new(io::ErrorKind::Other, "File bad format"));
+			return Ok(true);
 		}
 		Err(io::Error::new(io::ErrorKind::Other, "Need file name"))
 	}
