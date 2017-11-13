@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashSet;
 use parser_module::parser::Parser;
+use parser_module::parser;
 
 #[derive(Debug)]
 pub enum Types {
@@ -10,18 +11,18 @@ pub enum Types {
 	None,
 }
 
-#[derive(Debug)]
-pub enum Operator {
-	Not,
-	And,
-	Or,
-	Xor,
-}
+// #[derive(Debug)]
+// pub enum Operator {
+// 	Not,
+// 	And,
+// 	Or,
+// 	Xor,
+// }
 
 #[derive(Debug)]
 pub struct Rule {
-	pub op: Operator,
-	pub content:String,
+	// pub op: Operator,
+	pub operator: String,
 }
 
 #[derive(Debug)]
@@ -64,9 +65,9 @@ impl Node {
 	}
 
 	pub fn is_not_in_edges(&self, nodes: &Vec<Rc<RefCell<Node>>>, name: &char) -> bool {
-		println!("search for {:?}", name);
+		// println!("search for {:?}", name);
 		for node in nodes.iter() {
-			println!("name > {:?}", node.borrow().name);
+			// println!("name > {:?}", node.borrow().name);
 			if node.borrow().name == name.to_string() {
 				return false;
 			}
@@ -99,26 +100,70 @@ impl Node {
 		node_p.borrow_mut().edges.push(node_c.clone());
 	}
 
+	pub fn init_facts(&mut self, elem: &parser::Node) {
+		for item in elem.rules.chars() {
+			if item.is_alphabetic() && self.is_not_in_edges(&self.edges, &item) {
+
+				let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
+				self.edges.push(tmp.clone());
+			}
+		}
+
+		for item in elem.facts.chars() {
+			if item.is_alphabetic() && self.is_not_in_edges(&self.edges, &item) {
+
+				let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
+				self.edges.push(tmp.clone());
+			}
+		}
+	}
+
+	pub fn gen_rule(&mut self, elem: &String) {
+		println!("rule --- {:?}", elem);
+		let mut tmp_stack: Vec<String> = vec![];
+
+		for rule in elem.chars().rev() {
+			if rule.is_alphabetic() {
+				if let Some(value) = tmp_stack.pop() {
+					let mut tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: value } ));
+					tmp.borrow_mut().edges.push(self.get_node_by_name(rule.to_string()));
+					self.edges.push(tmp.clone());
+				}
+			} else {
+				tmp_stack.push(rule.to_string().clone());
+			}
+		}
+		println!("rule ---> {:?}", tmp_stack);
+	}
+
+	pub fn init_rules(&mut self, elem: &parser::Node) {
+		for fact in elem.facts.chars() {
+
+			self.gen_rule(&elem.rules);
+			// let new_rule =
+			break;
+			// if item.is_alphabetic() {
+			// let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
+			// self.edges.push(tmp.clone());
+			// }
+		}
+	}
+
+	// // test init list A in C
+	// if item == 'A' {
+	// 	self.insert_node(String::from("A"), String::from("C"));
+	// }
+	// // test init list C in W
+	// if item == 'W' {
+	// 	self.insert_node(String::from("C"), String::from("W"));
+	// }
+
 	pub fn generate(&mut self, data : &mut Parser) {
 		for elem in data.node.iter() {
-			println!("elem > {:?}", elem);
-			for item in elem.rules.chars() {
-				// println!("rules > {:?}", item);
-				if item.is_alphabetic() && self.is_not_in_edges(&self.edges, &item){
-					let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
-					self.edges.push(tmp.clone());
-
-
-					// test init list A in C
-					if item == 'A'{
-						self.insert_node(String::from("A"), String::from("C"));
-					}
-					// test init list C in W
-					if item == 'W'{
-						self.insert_node(String::from("C"), String::from("W"));
-					}
-				}
-			}
+			// println!("elem > {:?}", elem);
+			self.init_facts(elem);
+			self.init_rules(elem);
+			break;
 		}
 		self.start_node();
 	}
