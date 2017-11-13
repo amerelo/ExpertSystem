@@ -96,7 +96,6 @@ impl Node {
 			Types::Rul(ref mut rul) => println!("rul -> {:?}", rul),
 			Types::None => println!("None"),
 		}
-
 		node_p.borrow_mut().edges.push(node_c.clone());
 	}
 
@@ -118,22 +117,38 @@ impl Node {
 		}
 	}
 
+	pub fn stack_test(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
+
+		if let Some(node) = stack.pop() {
+			if node.borrow().edges.len() < 2 {
+				node.borrow_mut().edges.push(new_node.clone());
+			} else {
+				self.stack_test(&mut stack, new_node.clone());
+			}
+			stack.push(node);
+		}
+		stack.push(new_node);
+	}
+
 	pub fn gen_rule(&mut self, elem: &String) {
-		println!("rule --- {:?}", elem);
-		let mut tmp_stack: Vec<String> = vec![];
+		println!("rule - - - {:?}", elem);
+		let mut operator_stack: Vec<Rc<RefCell<Node>>> = vec![];
 
 		for rule in elem.chars().rev() {
 			if rule.is_alphabetic() {
-				if let Some(value) = tmp_stack.pop() {
-					let mut tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: value } ));
-					tmp.borrow_mut().edges.push(self.get_node_by_name(rule.to_string()));
-					self.edges.push(tmp.clone());
-				}
+				// if let Some(value) = operator_stack.pop() {
+				// 	let mut tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: value } ));
+				// 	tmp.borrow_mut().edges.push(self.get_node_by_name(rule.to_string()));
+				// 	self.edges.push(tmp.clone());
+				// }
 			} else {
-				tmp_stack.push(rule.to_string().clone());
+				let mut tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone() } ));
+				self.stack_test(&mut operator_stack, tmp.clone());
 			}
 		}
-		println!("rule ---> {:?}", tmp_stack);
+		// println!("rule - - - > {:?}", tmp_stack);
+		println!("operator_stack - - - > {:?}", operator_stack);
+
 	}
 
 	pub fn init_rules(&mut self, elem: &parser::Node) {
