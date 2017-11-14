@@ -117,50 +117,57 @@ impl Node {
 		}
 	}
 
-	pub fn stack_test(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
-
+	pub fn stack_operator(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
 		if let Some(node) = stack.pop() {
 			if node.borrow().edges.len() < 2 {
 				node.borrow_mut().edges.push(new_node.clone());
 			} else {
-				self.stack_test(&mut stack, new_node.clone());
+				self.stack_operator(&mut stack, new_node.clone());
 			}
 			stack.push(node);
 		}
 		stack.push(new_node);
 	}
 
-	pub fn gen_rule(&mut self, elem: &String) {
+	pub fn constructor(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
+
+		if let Some(node) = stack.pop() {
+			if node.borrow().edges.len() < 2 {
+				node.borrow_mut().edges.push(new_node.clone());
+			} else {
+				self.constructor(&mut stack, new_node.clone());
+			}
+			stack.push(node);
+		}
+	}
+
+	pub fn gen_rule(&mut self, elem: &String) -> Rc<RefCell<Node>> {
 		println!("rule - - - {:?}", elem);
 		let mut operator_stack: Vec<Rc<RefCell<Node>>> = vec![];
 
 		for rule in elem.chars().rev() {
 			if rule.is_alphabetic() {
-				// if let Some(value) = operator_stack.pop() {
-				// 	let mut tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: value } ));
-				// 	tmp.borrow_mut().edges.push(self.get_node_by_name(rule.to_string()));
-				// 	self.edges.push(tmp.clone());
-				// }
+				let node = self.get_node_by_name(rule.to_string());
+				self.constructor(&mut operator_stack, node);
 			} else {
 				let mut tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone() } ));
-				self.stack_test(&mut operator_stack, tmp.clone());
+				self.stack_operator(&mut operator_stack, tmp.clone());
 			}
 		}
 		// println!("rule - - - > {:?}", tmp_stack);
-		println!("operator_stack - - - > {:?}", operator_stack);
-
+		println!("operator_stack - - - > {:?}", operator_stack[0]);
+		return operator_stack[0].clone();
 	}
 
 	pub fn init_rules(&mut self, elem: &parser::Node) {
-		for fact in elem.facts.chars() {
+		let new_rule = self.gen_rule(&elem.rules);
 
-			self.gen_rule(&elem.rules);
-			// let new_rule =
+		for fact in elem.facts.chars() {
+			if fact.is_alphabetic() {
+				let mut current_fact = self.get_node_by_name(fact.to_string());
+				current_fact.borrow_mut().edges.push(new_rule.clone());
+			}
 			break;
-			// if item.is_alphabetic() {
-			// let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
-			// self.edges.push(tmp.clone());
-			// }
 		}
 	}
 
