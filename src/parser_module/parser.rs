@@ -30,12 +30,14 @@ impl Parser
 		return true;
 	}
 
-	fn declaration_is_valid(&mut self, line: &String, t: char) -> bool
+	fn declaration_is_valid(&mut self, line: &String, t: char, search: bool) -> bool
 	{
 		for (i, elem) in line.chars().enumerate() {
 			if i == 0 && elem == t {}
-			else if elem.is_alphabetic() {
+			else if elem.is_alphabetic() && search == false {
 				self.val_init.push(elem.to_string().clone());
+			} else if elem.is_alphabetic() && search == true {
+				self.val_search.push(elem.to_string().clone());
 			} else {
 				println!("Error bad bormat {}", line);
 				return false;
@@ -84,12 +86,12 @@ impl Parser
 				}
 				self.node.push(node);
 			} else if let Some(_val) = line.find("=") {
-				if !self.declaration_is_valid(& line, '='){
+				if !self.declaration_is_valid(& line, '=', false){
 					println!("Error bad format for line >  {:?}", line);
 					return false;
 				}
 			} else if let Some(_val) = line.find("?") {
-				if !self.declaration_is_valid(& line, '?') {
+				if !self.declaration_is_valid(& line, '?', true) {
 					println!("Error bad format for line >  {:?}", line);
 					return false;
 				}

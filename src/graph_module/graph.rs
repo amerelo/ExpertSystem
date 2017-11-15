@@ -48,21 +48,21 @@ impl Node {
 		}))
 	}
 
-	pub fn traverse<F>(&self, f: &F, seen: &mut HashSet<String>)
-	where F: Fn(String)
-	{
-		if seen.contains(&self.name) {
-			return;
-		}
-		f(self.name.clone());
-		seen.insert(self.name.clone());
-
-		// println!("edges for self >>>  {:?}", self.edges);
-		for n in &self.edges {
-			// println!("n ? {:?}", n);
-			n.borrow().traverse(f, seen);
-		}
-	}
+	// pub fn traverse<F>(&self, f: &F, seen: &mut HashSet<String>)
+	// where F: Fn(String)
+	// {
+	// 	if seen.contains(&self.name) {
+	// 		return;
+	// 	}
+	// 	f(self.name.clone());
+	// 	seen.insert(self.name.clone());
+	//
+	// 	// println!("edges for self >>>  {:?}", self.edges);
+	// 	for n in &self.edges {
+	// 		// println!("n ? {:?}", n);
+	// 		n.borrow().traverse(f, seen);
+	// 	}
+	// }
 
 	pub fn is_not_in_edges(&self, nodes: &Vec<Rc<RefCell<Node>>>, name: &char) -> bool {
 		// println!("search for {:?}", name);
@@ -85,19 +85,19 @@ impl Node {
 		return self.edges[0].clone();
 	}
 
-	pub fn insert_node(&self, node2: String, node1: String) {
-
-		let mut node_c = self.get_node_by_name(node2);
-		let mut node_p = self.get_node_by_name(node1);
-
-		// set struct Fact valid to true
-		match node_c.borrow_mut().classe {
-			Types::Fac(ref mut fact) => fact.valid = true,
-			Types::Rul(ref mut rul) => println!("rul -> {:?}", rul),
-			Types::None => println!("None"),
-		}
-		node_p.borrow_mut().edges.push(node_c.clone());
-	}
+	// pub fn insert_node(&self, node2: String, node1: String) {
+	//
+	// 	let mut node_c = self.get_node_by_name(node2);
+	// 	let mut node_p = self.get_node_by_name(node1);
+	//
+	// 	// set struct Fact valid to true
+	// 	match node_c.borrow_mut().classe {
+	// 		Types::Fac(ref mut fact) => fact.valid = true,
+	// 		Types::Rul(ref mut rul) => println!("rul -> {:?}", rul),
+	// 		Types::None => println!("None"),
+	// 	}
+	// 	node_p.borrow_mut().edges.push(node_c.clone());
+	// }
 
 	pub fn init_facts(&mut self, elem: &parser::Node) {
 		for item in elem.rules.chars() {
@@ -117,6 +117,7 @@ impl Node {
 		}
 	}
 
+	// toto
 	pub fn stack_operator(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
 		if let Some(node) = stack.pop() {
 			if node.borrow().edges.len() < 2 {
@@ -129,6 +130,8 @@ impl Node {
 		stack.push(new_node);
 	}
 
+
+	// toto
 	pub fn constructor(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
 
 		if let Some(node) = stack.pop() {
@@ -146,16 +149,15 @@ impl Node {
 		let mut operator_stack: Vec<Rc<RefCell<Node>>> = vec![];
 
 		for rule in elem.chars().rev() {
-			if rule.is_alphabetic() {
+				if rule.is_alphabetic() {
 				let node = self.get_node_by_name(rule.to_string());
 				self.constructor(&mut operator_stack, node);
 			} else {
-				let mut tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone() } ));
+				let tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone() } ));
 				self.stack_operator(&mut operator_stack, tmp.clone());
 			}
 		}
-		// println!("rule - - - > {:?}", tmp_stack);
-		println!("operator_stack - - - > {:?}", operator_stack[0]);
+		// println!("operator_stack - - - > {:?}", operator_stack[0]);
 		return operator_stack[0].clone();
 	}
 
@@ -164,38 +166,41 @@ impl Node {
 
 		for fact in elem.facts.chars() {
 			if fact.is_alphabetic() {
-				let mut current_fact = self.get_node_by_name(fact.to_string());
+				let current_fact = self.get_node_by_name(fact.to_string());
 				current_fact.borrow_mut().edges.push(new_rule.clone());
 			}
-			break;
 		}
 	}
-
-	// // test init list A in C
-	// if item == 'A' {
-	// 	self.insert_node(String::from("A"), String::from("C"));
-	// }
-	// // test init list C in W
-	// if item == 'W' {
-	// 	self.insert_node(String::from("C"), String::from("W"));
-	// }
 
 	pub fn generate(&mut self, data : &mut Parser) {
 		for elem in data.node.iter() {
-			// println!("elem > {:?}", elem);
-			self.init_facts(elem);
+			self.init_facts(elem); // can be change
 			self.init_rules(elem);
-			break;
 		}
-		self.start_node();
+
+		self.start_node(data);
 	}
 
-	pub fn start_node(&self)
+	pub fn start_node(&self, data : &mut Parser)
 	{
 		println!("len {:?}", self.edges.len());
+		println!("data |-:|.|:-| {:?} --- {:?} ", data.val_init , data.val_search);
+
+		// init as true
 		for elem in self.edges.iter() {
+			if data.val_init.contains(&elem.borrow().name) {
+				if let Types::Fac(ref mut fac) = elem.borrow_mut().classe {
+					fac.valid = true;
+				}
+				println!("value {:?} --- ", elem.borrow().name );
+			}
 			println!("elem {:?}", elem );
 		}
+
+		for value in data.val_search.iter() {
+			//make stuff
+		}
+
 		// self.traverse(&|d| println!("{}", d), &mut HashSet::new());
 		// let f = self.first();
 		// self.foo(&*f.borrow());
