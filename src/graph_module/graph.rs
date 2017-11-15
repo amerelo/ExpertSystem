@@ -117,7 +117,7 @@ impl Node {
 		}
 	}
 
-	// toto
+	// can be changed
 	pub fn stack_operator(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
 		if let Some(node) = stack.pop() {
 			if node.borrow().edges.len() < 2 {
@@ -130,8 +130,7 @@ impl Node {
 		stack.push(new_node);
 	}
 
-
-	// toto
+	// can be changed
 	pub fn constructor(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
 
 		if let Some(node) = stack.pop() {
