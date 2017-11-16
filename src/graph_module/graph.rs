@@ -21,8 +21,8 @@ pub enum State {
 
 #[derive(Debug)]
 pub struct Rule {
-	// pub op: Operator,
 	pub operator: String,
+	pub state: State,
 }
 
 #[derive(Debug)]
@@ -35,7 +35,6 @@ pub struct Fact {
 #[derive(Debug)]
 pub struct Node {
 	pub name: String,
-	pub find: bool,
 	pub classe: Types,
 	pub edges: Vec<Rc<RefCell<Node>>>,
 }
@@ -44,7 +43,6 @@ impl Node {
 	pub fn new( name: String, classe: Types) -> Rc<RefCell<Node>> {
 		Rc::new(RefCell::new(Node {
 			name: name,
-			find: false,
 			classe: classe,
 			edges: Vec::new(),
 		}))
@@ -124,7 +122,7 @@ impl Node {
 				let node = self.get_node_by_name(rule.to_string());
 				self.constructor(&mut operator_stack, node);
 			} else {
-				let tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone() } ));
+				let tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone(), state: State::None } ));
 				self.constructor(&mut operator_stack, tmp.clone());
 				operator_stack.push(tmp.clone());
 			}
@@ -188,7 +186,10 @@ impl Node {
 
 		match node.borrow_mut().classe {
 			Types::Fac(ref mut fac) => return self.test_fact(fac, v, inv),
-			Types::Rul(ref rul) => return self.test_rul(&rul.operator, v),
+			Types::Rul(ref mut rul) => {
+				rul.state = self.test_rul(&rul.operator, v);
+				return self.test_rul(&rul.operator, v);
+			},
 			Types::None => panic!("Error empty Node"),
 		}
 	}
@@ -219,9 +220,6 @@ impl Node {
 					valid += 1;
 				}
 			}
-			// else {
-			// 	return self.test(head.clone(), 0, 0);
-			// }
 		}
 		return self.test(head.clone(), valid, invalid);
 	}
@@ -230,7 +228,6 @@ impl Node {
 	{
 		for node in self.edges.iter() {
 			if node.borrow().name == *elem {
-				// println!("name {}", elem);
 				let stack: Vec<String> = vec![];
 				self.find_the_truth(node.clone(), 0, stack.clone());
 			}
