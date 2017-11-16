@@ -49,22 +49,6 @@ impl Node {
 		}))
 	}
 
-	// pub fn traverse<F>(&self, f: &F, seen: &mut HashSet<String>)
-	// where F: Fn(String)
-	// {
-	// 	if seen.contains(&self.name) {
-	// 		return;
-	// 	}
-	// 	f(self.name.clone());
-	// 	seen.insert(self.name.clone());
-	//
-	// 	// println!("edges for self >>>  {:?}", self.edges);
-	// 	for n in &self.edges {
-	// 		// println!("n ? {:?}", n);
-	// 		n.borrow().traverse(f, seen);
-	// 	}
-	// }
-
 	pub fn is_not_in_edges(&self, nodes: &Vec<Rc<RefCell<Node>>>, name: &char) -> bool {
 		// println!("search for {:?}", name);
 		for node in nodes.iter() {
@@ -86,20 +70,6 @@ impl Node {
 		return self.edges[0].clone();
 	}
 
-	// pub fn insert_node(&self, node2: String, node1: String) {
-	//
-	// 	let mut node_c = self.get_node_by_name(node2);
-	// 	let mut node_p = self.get_node_by_name(node1);
-	//
-	// 	// set struct Fact valid to true
-	// 	match node_c.borrow_mut().classe {
-	// 		Types::Fac(ref mut fact) => fact.valid = true,
-	// 		Types::Rul(ref mut rul) => println!("rul -> {:?}", rul),
-	// 		Types::None => println!("None"),
-	// 	}
-	// 	node_p.borrow_mut().edges.push(node_c.clone());
-	// }
-
 	pub fn init_facts(&mut self, elem: &parser::Node) {
 		for item in elem.rules.chars() {
 			if item.is_alphabetic() && self.is_not_in_edges(&self.edges, &item) {
@@ -118,24 +88,16 @@ impl Node {
 		}
 	}
 
-	// can be changed
-	pub fn stack_operator(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
-		if let Some(node) = stack.pop() {
-			if node.borrow().edges.len() < 2 {
-				node.borrow_mut().edges.push(new_node.clone());
-			} else {
-				self.stack_operator(&mut stack, new_node.clone());
-			}
-			stack.push(node);
-		}
-		stack.push(new_node);
-	}
-
-	// can be changed
 	pub fn constructor(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
+		let mut operator: String = "".to_string();
 
 		if let Some(node) = stack.pop() {
-			if node.borrow().edges.len() < 2 {
+			if let Types::Rul(ref rul) = node.borrow().classe {
+				operator = rul.operator.clone();
+			}
+
+			// if node.borrow().edges.len() < 2 {
+			if (operator == "!" && node.borrow().edges.len() < 1) || (operator != "!" && node.borrow().edges.len() < 2) {
 				node.borrow_mut().edges.push(new_node.clone());
 			} else {
 				self.constructor(&mut stack, new_node.clone());
@@ -154,7 +116,8 @@ impl Node {
 				self.constructor(&mut operator_stack, node);
 			} else {
 				let tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone() } ));
-				self.stack_operator(&mut operator_stack, tmp.clone());
+				self.constructor(&mut operator_stack, tmp.clone());
+				operator_stack.push(tmp.clone());
 			}
 		}
 		// println!("operator_stack - - - > {:?}", operator_stack[0]);
@@ -181,20 +144,10 @@ impl Node {
 		self.start_node(data);
 	}
 
-	// fn is_fact_true(&self, node: &Node) -> bool {
-	//
-	// 	if let Types::Fac(ref fact) = node.classe {
-	// 		println!("is {:?} valid {:?}", fact.name , fact.valid);
-	// 	}
-	// 	return true;
-	// }
-
 	fn test_fact(&self, fact: &mut Fact, v: i32, inv: i32) -> State
 	{
-
-		println!("fact {:?} v {}", fact, v);
+		// println!("fact {:?} v {}", fact, v);
 		if (v > 0 && inv == 0) || (fact.valid && !fact.invalid) {
-			// println!("----------- valid");
 			fact.valid = true;
 			return State::Valid;
 		} else if (inv > 0 && v == 0) || (!fact.valid && fact.invalid) {
@@ -210,14 +163,16 @@ impl Node {
 
 	fn test_rul(&self, rule: &String, v: i32, inv: i32) -> State {
 
-		//println!("rule {} v {}", rule, v);
 		if "+" == rule {
 			if v == 2 {	return State::Valid; } else { return State::Invalid; }
 		} else if "|" == rule {
 			if v > 0 { return State::Valid; } else { return State::Invalid; }
 		} else if "^" == rule {
 			if v == 1 { return State::Valid; } else { return State::Invalid; }
+		} else if "!" == rule {
+			if v == 1 { return State::Invalid; } else { return State::Valid; }
 		}
+
 		return State::None;
 	}
 
@@ -287,15 +242,10 @@ impl Node {
 		}
 
 		for elem in self.edges.iter() {
-			//println!("elem {:?}", elem);
-			self.print_node(elem, 3);
+			if data.val_search.contains(&elem.borrow().name) {
+				self.print_node(elem, 3);
+			}
 		}
-
-		// self.traverse(&|d| println!("{}", d), &mut HashSet::new());
-		// let f = self.first();
-		// self.foo(&*f.borrow());
-		// let h = self.second();
-		// self.foo(&*h.borrow());
 	}
 
 	pub fn show_fact(&self, elem: &Fact)
