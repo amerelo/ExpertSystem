@@ -256,7 +256,7 @@ impl Node {
 
 		for elem in self.edges.iter() {
 			if data.val_search.contains(&elem.borrow().name) {
-				self.print_node(elem, 3);
+				self.print_node(elem, 0);
 			}
 		}
 	}
@@ -264,40 +264,74 @@ impl Node {
 	pub fn show_fact(&self, elem: &Fact)
 	{
 		if elem.valid == true {
-			print!("F: {} ", elem.name.green());
+			print!("{}", elem.name.green());
 		} else {
-			print!("F: {} ", elem.name.red());
+			print!("{}", elem.name.red());
 		}
 	}
-
-	pub fn print_node(&self, node:&Rc<RefCell<Node>>, depth:usize)
+	
+    pub fn print_node(&self, node:&Rc<RefCell<Node>>, depth:usize)
 	{
 		let elem = node.borrow();
 		if elem.edges.len() > 0 {
-			if depth == 3 {
-				// println!("");
+			if depth == 0 {
 				if let Types::Fac(ref Fact) = elem.classe {
 					self.show_fact(Fact);
-					println!("<=");
+					println!("╗ {:?}", "MEGARULE");
 				}
 			}
-
+            let mut ni = 0;
 			for child in elem.edges.iter() {
+                print!(" ");
 				match child.borrow().classe {
 					Types::Fac(ref Fact) => {
-						print!("{:>width$}", "",width=(3*depth));
+						if (ni == 0)
+                        {
+                            print!("{n:<width$}",n="".blue(),width=(1*depth));
+                            print!("╚");
+						    print!("╦═");
+                        }
+                        else
+                        {
+                            print!(" {n:<width$}",n="".blue(),width=(1*depth));
+						    print!("╚═");
+                        }
 						self.show_fact(Fact);
 						println!("");
 					},
-					Types::Rul(ref Rule) => {
-						// println!("");
-						print!{"{n:>width$}",n="", width=(3* depth)};
-						println!("Op [{}]", Rule.operator);
-						self.print_node(&child, depth + 1);
+					Types::Rul(ref rule) => {
+                        print!("{n:<width$}",n="".blue(),width=(1*depth));
+                        if (ni == 0) {
+                            print!("╚╦═");
+                        } else {
+                            if (child.borrow().edges.len() > 0) {
+						        print!(" ╠═");
+                            } else {
+						        print!(" ╚═");
+                            }
+                        }
+                        let op:String = String::from("Op");
+
+                        match rule.state {
+                            State::Valid => {
+					            println!("{}[{}]", op.green(), rule.operator.green());
+                            },
+                            State::Invalid => {
+					            println!("{}[{}]", op.red(), rule.operator.red());
+                            },
+                            State::Undefined => {
+					            println!("{}[{}]", op.cyan(), rule.operator.cyan());
+                            },
+                            State::None => {
+					            println!("{}[{}]", op.blue(), rule.operator.blue());
+                            }
+                        }
+                        self.print_node(&child, depth + 1);
 					},
 					Types::None => {
 					}
 				}
+                ni+=1;
 			}
 		}
 	}
