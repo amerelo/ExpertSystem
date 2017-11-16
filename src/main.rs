@@ -1,3 +1,6 @@
+extern crate colored;
+
+
 mod parser_module;
 mod rpn_module;
 mod graph_module;

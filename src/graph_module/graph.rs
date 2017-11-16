@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use std::collections::HashSet;
 use parser_module::parser::Parser;
 use parser_module::parser;
+use colored::*;
 
 #[derive(Debug)]
 pub enum Types {
@@ -209,7 +210,7 @@ impl Node {
 
 	fn test_rul(&self, rule: &String, v: i32, inv: i32) -> State {
 
-		println!("rule {} v {}", rule, v);
+		//println!("rule {} v {}", rule, v);
 		if "+" == rule {
 			if v == 2 {	return State::Valid; } else { return State::Invalid; }
 		} else if "|" == rule {
@@ -237,7 +238,7 @@ impl Node {
 		// println!("search of {} ", head.borrow().name);
 		for node in head.borrow().edges.iter() {
 
-			println!("item name {:?} --- index {}", node.borrow().name, index);
+			//println!("item name {:?} --- index {}", node.borrow().name, index);
 			let state = self.find_the_truth(node.clone(), index + 1);
 			if let State::Valid = state {
 				valid += 1;
@@ -258,7 +259,7 @@ impl Node {
 	{
 		for node in self.edges.iter() {
 			if node.borrow().name == *elem {
-				println!("search of {} ", elem);
+				//println!("search of {} ", elem);
 				// self.is_fact_true(&*node.borrow()
 				self.find_the_truth(node.clone(), 0);
 			}
@@ -267,8 +268,8 @@ impl Node {
 
 	pub fn start_node(&mut self, data : &mut Parser)
 	{
-		println!("len {:?}", self.edges.len());
-		println!("data |-:|.|:-| {:?} --- {:?} ", data.val_init , data.val_search);
+		//println!("len {:?}", self.edges.len());
+		//println!("data |-:|.|:-| {:?} --- {:?} ", data.val_init , data.val_search);
 
 		// init as true
 		for elem in self.edges.iter() {
@@ -286,7 +287,8 @@ impl Node {
 		}
 
 		for elem in self.edges.iter() {
-			println!("elem {:?}", elem);
+			//println!("elem {:?}", elem);
+			self.print_node(elem, 3);
 		}
 
 		// self.traverse(&|d| println!("{}", d), &mut HashSet::new());
@@ -296,40 +298,44 @@ impl Node {
 		// self.foo(&*h.borrow());
 	}
 
+	pub fn show_fact(&self, elem: &Fact)
+	{
+		if elem.valid == true {
+			print!("F: {} ", elem.name.green());
+		} else {
+			print!("F: {} ", elem.name.red());
+		}
+	}
 
+	pub fn print_node(&self, node:&Rc<RefCell<Node>>, depth:usize)
+	{
+		let elem = node.borrow();
+		if elem.edges.len() > 0 {
+			if depth == 3 {
+				// println!("");
+				if let Types::Fac(ref Fact) = elem.classe {
+					self.show_fact(Fact);
+					println!("<=");
+				}
+			}
 
-	// pub fn first(&self) -> Rc<RefCell<Node>> {
-	// 	self.edges[0].clone()
-	// }
-	// pub fn second(&self) -> Rc<RefCell<Node>> {
-	// 	self.edges[1].clone()
-	// }
-
-	// pub fn foo(&self, node: &Node) {
-	// 	println!("name: {}", node.name);
-	// }
+			for child in elem.edges.iter() {
+				match child.borrow().classe {
+					Types::Fac(ref Fact) => {
+						print!("{:>width$}", "",width=(3*depth));
+						self.show_fact(Fact);
+						println!("");
+					},
+					Types::Rul(ref Rule) => {
+						// println!("");
+						print!{"{n:>width$}",n="", width=(3* depth)};
+						println!("Op [{}]", Rule.operator);
+						self.print_node(&child, depth + 1);
+					},
+					Types::None => {
+					}
+				}
+			}
+		}
+	}
 }
-
-// pub fn init() -> Rc<RefCell<Node>> {
-//
-// 	let root = Node::new("A", "ALPHA", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
-//
-// 	let b = Node::new("B", "Beta", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
-// 	let c = Node::new("C", "Charly", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
-// 	let d = Node::new("D", "Delta", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
-// 	let e = Node::new("E", "Epsilon", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
-// 	let f = Node::new("F", "FALSE", Types::Fac(Fact{name: "toto".to_string(), valid: false, invalid: false }) );
-//
-// 	{
-// 		let mut mut_root = root.borrow_mut();
-// 		mut_root.edges.push(b.clone());
-// 		mut_root.edges.push(c.clone());
-// 		mut_root.edges.push(d.clone());
-//
-// 		let mut mut_c = c.borrow_mut();
-// 		mut_c.edges.push(e.clone());
-// 		mut_c.edges.push(f.clone());
-// 		// mut_c.edges.push(root.clone());
-// 	}
-// 	root
-// }
