@@ -30,6 +30,19 @@ impl Parser
 		return true;
 	}
 
+	fn operation_is_valid_fac(line: &String) -> bool
+	{
+		for val in line.chars() {
+			if !val.is_alphabetic() && !val.is_whitespace() &&
+				val != '+' && val != '(' && val != ')' && val != '!'
+			{
+				println!("Error bad value {} in line {}", val, line);
+				return false;
+			}
+		}
+		return true;
+	}
+
 	fn declaration_is_valid(&mut self, line: &String, t: char, search: bool) -> bool
 	{
 		for (i, elem) in line.chars().enumerate() {
@@ -46,6 +59,56 @@ impl Parser
 		return true;
 	}
 
+
+	fn pars_fact(&mut self, node: &mut Node) {
+		for elem in node.facts.chars() {
+			let mut lastnode: Node = Node{ rules: String::from(""), facts: String::from("") };
+			lastnode.rules = node.rules.clone();
+			if elem.is_alphabetic() {
+				lastnode.facts = elem.to_string().clone();
+				self.node.push(lastnode);
+			}
+		}
+	}
+
+	fn normal_line(&mut self, line: &String, node: &mut Node) {
+		line.split("=>").enumerate().for_each(|x|
+			if x.0 == 2 {
+				node.rules = String::from("");
+				panic!("Error more than 2 |=>| in line >  {}", line);
+			}
+			else if x.0 == 0 && Parser::operation_is_valid(& x.1.to_string())
+				{ node.rules = x.1.to_string(); }
+			else if x.0 == 1 && Parser::operation_is_valid(& x.1.to_string())
+				{ node.facts = x.1.to_string(); }
+		);
+
+		if node.rules.len() == 0 || node.facts.len() == 0 {
+				panic!("Error: no argument found");
+		}
+		self.pars_fact(node);
+	}
+
+	fn complex_line(&mut self, line: &String, node: &mut Node, node2: &mut Node) {
+		line.split("<=>").enumerate().for_each(|x|
+			if x.0 == 2 {
+				node.rules = String::from("");
+				panic!("Error more than 2 |=>| in line >  {}", line);
+			}
+			else if x.0 == 0 && Parser::operation_is_valid_fac(& x.1.to_string())
+				{ node.rules = x.1.to_string(); }
+			else if x.0 == 1 && Parser::operation_is_valid_fac(& x.1.to_string())
+				{ node.facts = x.1.to_string(); }
+		);
+		if node.rules.len() == 0 || node.facts.len() == 0 {
+				panic!("Error: no argument found");
+		}
+		node2.rules = node.facts.clone();
+		node2.facts = node.rules.clone();
+		self.pars_fact(node);
+		self.pars_fact(node2);
+	}
+
 	fn validator(&mut self, raw_file: &mut Vec<String>) -> bool
 	{
 		for line in raw_file {
@@ -53,38 +116,9 @@ impl Parser
 			let mut node2: Node = Node{ rules: String::from(""), facts: String::from("") };
 
 			if let Some(_val) = line.find("<=>") {
-				line.split("<=>").enumerate().for_each(|x|
-					if x.0 == 2 {
-						println!("Error more than 2 |<=>| in line >  {}", line);
-						node.rules = String::from("");
-					}
-					else if x.0 == 0 && Parser::operation_is_valid(& x.1.to_string())
-						{ node.rules = x.1.to_string(); }
-					else if x.0 == 1 && Parser::operation_is_valid(& x.1.to_string())
-						{ node.facts = x.1.to_string(); }
-				);
-				if node.rules.len() == 0 || node.facts.len() == 0 {
-						return false;
-				}
-				node2.rules = node.facts.clone();
-				node2.facts = node.rules.clone();
-				self.node.push(node);
-				self.node.push(node2);
+				self.complex_line(&line, &mut node, &mut node2);
 			} else if let Some(_val) = line.find("=>") {
-				line.split("=>").enumerate().for_each(|x|
-					if x.0 == 2 {
-						println!("Error more than 2 |=>| in line >  {}", line);
-						node.rules = String::from("");
-					}
-					else if x.0 == 0 && Parser::operation_is_valid(& x.1.to_string())
-						{ node.rules = x.1.to_string(); }
-					else if x.0 == 1 && Parser::operation_is_valid(& x.1.to_string())
-						{ node.facts = x.1.to_string(); }
-				);
-				if node.rules.len() == 0 || node.facts.len() == 0 {
-						return false;
-				}
-				self.node.push(node);
+				self.normal_line(&line, &mut node);
 			} else if let Some(_val) = line.find("=") {
 				if !self.declaration_is_valid(& line, '=', false){
 					println!("Error bad format for line >  {:?}", line);

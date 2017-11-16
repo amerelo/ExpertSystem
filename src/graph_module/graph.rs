@@ -1,6 +1,5 @@
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::collections::HashSet;
 use parser_module::parser::Parser;
 use parser_module::parser;
 use colored::*;
@@ -36,6 +35,7 @@ pub struct Fact {
 #[derive(Debug)]
 pub struct Node {
 	pub name: String,
+	pub find: bool,
 	pub classe: Types,
 	pub edges: Vec<Rc<RefCell<Node>>>,
 }
@@ -44,6 +44,7 @@ impl Node {
 	pub fn new( name: String, classe: Types) -> Rc<RefCell<Node>> {
 		Rc::new(RefCell::new(Node {
 			name: name,
+			find: false,
 			classe: classe,
 			edges: Vec::new(),
 		}))
@@ -81,11 +82,19 @@ impl Node {
 
 		for item in elem.facts.chars() {
 			if item.is_alphabetic() && self.is_not_in_edges(&self.edges, &item) {
-
 				let tmp = Node::new(item.to_string().clone(), Types::Fac(Fact{name: item.to_string().clone(), valid: false, invalid: false,}) );
 				self.edges.push(tmp.clone());
 			}
 		}
+
+		for fac in elem.facts.chars() {
+			for rul in elem.rules.chars() {
+				if fac.is_alphabetic() && rul.is_alphabetic() && rul == fac{
+					panic!("ERROR: the same elem is as Fact and Rule");
+				}
+			}
+		}
+		// println!("self {:?}", self);
 	}
 
 	pub fn constructor(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
@@ -96,18 +105,18 @@ impl Node {
 				operator = rul.operator.clone();
 			}
 
-			// if node.borrow().edges.len() < 2 {
 			if (operator == "!" && node.borrow().edges.len() < 1) || (operator != "!" && node.borrow().edges.len() < 2) {
 				node.borrow_mut().edges.push(new_node.clone());
 			} else {
 				self.constructor(&mut stack, new_node.clone());
 			}
 			stack.push(node);
+		} else {
+			stack.push(new_node.clone());
 		}
 	}
 
 	pub fn gen_rule(&mut self, elem: &String) -> Rc<RefCell<Node>> {
-		println!("rule - - - {:?}", elem);
 		let mut operator_stack: Vec<Rc<RefCell<Node>>> = vec![];
 
 		for rule in elem.chars().rev() {
@@ -120,7 +129,6 @@ impl Node {
 				operator_stack.push(tmp.clone());
 			}
 		}
-		// println!("operator_stack - - - > {:?}", operator_stack[0]);
 		return operator_stack[0].clone();
 	}
 
@@ -161,7 +169,7 @@ impl Node {
 		return State::None;
 	}
 
-	fn test_rul(&self, rule: &String, v: i32, inv: i32) -> State {
+	fn test_rul(&self, rule: &String, v: i32) -> State {
 
 		if "+" == rule {
 			if v == 2 {	return State::Valid; } else { return State::Invalid; }
@@ -176,47 +184,55 @@ impl Node {
 		return State::None;
 	}
 
-	fn test(&self, node: &Rc<RefCell<Node>>, v: i32, inv: i32) -> State {
+	fn test(&self, node: Rc<RefCell<Node>>, v: i32, inv: i32) -> State {
 
 		match node.borrow_mut().classe {
 			Types::Fac(ref mut fac) => return self.test_fact(fac, v, inv),
-			Types::Rul(ref rul) => return self.test_rul(&rul.operator, v, inv),
+			Types::Rul(ref rul) => return self.test_rul(&rul.operator, v),
 			Types::None => panic!("Error empty Node"),
 		}
-		return State::None;
 	}
 
-	fn find_the_truth(&self, head :Rc<RefCell<Node>>, index: i32) -> State {
+	fn find_the_truth(&self, head: Rc<RefCell<Node>>, index: i32, old_stack: Vec<String>) -> State {
 		let mut valid: i32 = 0;
 		let mut invalid: i32 = 0;
+		let mut stack: Vec<String> = old_stack.clone();
 
-		// println!("search of {} ", head.borrow().name);
-		for node in head.borrow().edges.iter() {
-
-			//println!("item name {:?} --- index {}", node.borrow().name, index);
-			let state = self.find_the_truth(node.clone(), index + 1);
-			if let State::Valid = state {
-				valid += 1;
-			} else if let State::Invalid = state {
-				invalid += 1;
-			} else if let State::Undefined = state {
-				println!("Help");
-				invalid += 1;
-				valid += 1;
-			}
-			// match self.find_the_truth(node.clone(), index + 1)
-			// if let State::Valid
+		if head.borrow().name.len() == 1 {
+			stack.push(head.borrow().name.clone());
 		}
-		return self.test(&head, valid, invalid);
+
+		for node in head.borrow().edges.iter() {
+			if !stack.contains(&node.borrow().name) {
+				let state = self.find_the_truth(node.clone(), index + 1, stack.clone());
+				if head.borrow().name.len() == 1 {
+					stack.push(node.borrow().name.clone());
+				}
+
+				if let State::Valid = state {
+					valid += 1;
+				} else if let State::Invalid = state {
+					invalid += 1;
+				} else if let State::Undefined = state {
+					println!("Help");
+					invalid += 1;
+					valid += 1;
+				}
+			}
+			// else {
+			// 	return self.test(head.clone(), 0, 0);
+			// }
+		}
+		return self.test(head.clone(), valid, invalid);
 	}
 
 	pub fn search_in_graph(&mut self, elem: &String)
 	{
 		for node in self.edges.iter() {
 			if node.borrow().name == *elem {
-				//println!("search of {} ", elem);
-				// self.is_fact_true(&*node.borrow()
-				self.find_the_truth(node.clone(), 0);
+				// println!("name {}", elem);
+				let stack: Vec<String> = vec![];
+				self.find_the_truth(node.clone(), 0, stack.clone());
 			}
 		}
 	}

@@ -31,6 +31,6 @@ pub fn main() {
 		panic!("Error : {}", e);
 	}
 	Rpn::prefixparse(&mut data);
-	let mut graph: Node = Node{name: "(A) masternode".to_string(), classe: Types::None, edges: vec![]};
+	let mut graph: Node = Node{name: "MasterNode".to_string(), classe: Types::None, edges: vec![], find: false};
 	graph.generate(&mut data);
 }
