@@ -11,13 +11,13 @@ pub enum Types {
 	None,
 }
 
-// #[derive(Debug)]
-// pub enum Operator {
-// 	Not,
-// 	And,
-// 	Or,
-// 	Xor,
-// }
+#[derive(Debug)]
+pub enum State {
+	Valid,
+	Invalid,
+	Undefined,
+	None,
+}
 
 #[derive(Debug)]
 pub struct Rule {
@@ -148,7 +148,7 @@ impl Node {
 		let mut operator_stack: Vec<Rc<RefCell<Node>>> = vec![];
 
 		for rule in elem.chars().rev() {
-				if rule.is_alphabetic() {
+			if rule.is_alphabetic() {
 				let node = self.get_node_by_name(rule.to_string());
 				self.constructor(&mut operator_stack, node);
 			} else {
@@ -180,7 +180,92 @@ impl Node {
 		self.start_node(data);
 	}
 
-	pub fn start_node(&self, data : &mut Parser)
+	// fn is_fact_true(&self, node: &Node) -> bool {
+	//
+	// 	if let Types::Fac(ref fact) = node.classe {
+	// 		println!("is {:?} valid {:?}", fact.name , fact.valid);
+	// 	}
+	// 	return true;
+	// }
+
+	fn test_fact(&self, fact: &mut Fact, v: i32, inv: i32) -> State
+	{
+
+		println!("fact {:?} v {}", fact, v);
+		if (v > 0 && inv == 0) || (fact.valid && !fact.invalid) {
+			// println!("----------- valid");
+			fact.valid = true;
+			return State::Valid;
+		} else if (inv > 0 && v == 0) || (!fact.valid && fact.invalid) {
+			fact.invalid = true;
+			return State::Invalid;
+		} else if (inv > 0 && v > 0) || (fact.valid && fact.invalid){
+			fact.valid = true;
+			fact.invalid = true;
+			return State::Undefined;
+		}
+		return State::None;
+	}
+
+	fn test_rul(&self, rule: &String, v: i32, inv: i32) -> State {
+
+		println!("rule {} v {}", rule, v);
+		if "+" == rule {
+			if v == 2 {	return State::Valid; } else { return State::Invalid; }
+		} else if "|" == rule {
+			if v > 0 { return State::Valid; } else { return State::Invalid; }
+		} else if "^" == rule {
+			if v == 1 { return State::Valid; } else { return State::Invalid; }
+		}
+		return State::None;
+	}
+
+	fn test(&self, node: &Rc<RefCell<Node>>, v: i32, inv: i32) -> State {
+
+		match node.borrow_mut().classe {
+			Types::Fac(ref mut fac) => return self.test_fact(fac, v, inv),
+			Types::Rul(ref rul) => return self.test_rul(&rul.operator, v, inv),
+			Types::None => panic!("Error empty Node"),
+		}
+		return State::None;
+	}
+
+	fn find_the_truth(&self, head :Rc<RefCell<Node>>, index: i32) -> State {
+		let mut valid: i32 = 0;
+		let mut invalid: i32 = 0;
+
+		// println!("search of {} ", head.borrow().name);
+		for node in head.borrow().edges.iter() {
+
+			println!("item name {:?} --- index {}", node.borrow().name, index);
+			let state = self.find_the_truth(node.clone(), index + 1);
+			if let State::Valid = state {
+				valid += 1;
+			} else if let State::Invalid = state {
+				invalid += 1;
+			} else if let State::Undefined = state {
+				println!("Help");
+				invalid += 1;
+				valid += 1;
+			}
+			// match self.find_the_truth(node.clone(), index + 1)
+			// if let State::Valid
+		}
+		return self.test(&head, valid, invalid);
+	}
+
+	pub fn search_in_graph(&mut self, elem: &String)
+	{
+		for node in self.edges.iter() {
+			if node.borrow().name == *elem {
+				println!("search of {} ", elem);
+				// self.is_fact_true(&*node.borrow()
+				self.find_the_truth(node.clone(), 0);
+			}
+		}
+	}
+
+	pub fn start_node(&mut self, data : &mut Parser)
 	{
 		println!("len {:?}", self.edges.len());
 		println!("data |-:|.|:-| {:?} --- {:?} ", data.val_init , data.val_search);
@@ -191,13 +276,17 @@ impl Node {
 				if let Types::Fac(ref mut fac) = elem.borrow_mut().classe {
 					fac.valid = true;
 				}
-				println!("value {:?} --- ", elem.borrow().name );
+				// println!("value {:?} --- ", elem.borrow().name );
 			}
-			println!("elem {:?}", elem );
+			// println!("elem {:?}", elem );
 		}
 
 		for value in data.val_search.iter() {
-			//make stuff
+			self.search_in_graph(value);
+		}
+
+		for elem in self.edges.iter() {
+			println!("elem {:?}", elem);
 		}
 
 		// self.traverse(&|d| println!("{}", d), &mut HashSet::new());
@@ -206,6 +295,8 @@ impl Node {
 		// let h = self.second();
 		// self.foo(&*h.borrow());
 	}
+
+
 
 	// pub fn first(&self) -> Rc<RefCell<Node>> {
 	// 	self.edges[0].clone()
