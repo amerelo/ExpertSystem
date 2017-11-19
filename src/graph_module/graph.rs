@@ -194,31 +194,73 @@ impl Node {
 		}
 	}
 
+	fn get_node_state(&self, node: Rc<RefCell<Node>>) -> State
+	{
+		match node.borrow().classe {
+			Types::Fac(ref fac) => {
+				if fac.valid == true {
+					return State::Valid;
+				} else {
+					return State::Invalid;
+				}
+				// else if fac.invalid == true {
+				// 	return State::Invalid;
+				// }
+				// else (undefined)
+			},
+			Types::Rul(ref rul) => {
+				if let State::Valid = rul.state {
+					return State::Valid;
+				} else if let State::Invalid = rul.state {
+					return State::Invalid;
+				} else {
+					return State::Undefined;
+				}
+			},
+			Types::None => panic!("Error empty Node"),
+		}
+	}
+
 	fn find_the_truth(&self, head: Rc<RefCell<Node>>, index: i32, old_stack: Vec<String>) -> State {
 		let mut valid: i32 = 0;
 		let mut invalid: i32 = 0;
 		let mut stack: Vec<String> = old_stack.clone();
+		let mut state: State = State::Invalid;
 
 		if head.borrow().name.len() == 1 {
 			stack.push(head.borrow().name.clone());
 		}
 
 		for node in head.borrow().edges.iter() {
+
 			if !stack.contains(&node.borrow().name) {
-				let state = self.find_the_truth(node.clone(), index + 1, stack.clone());
-				if head.borrow().name.len() == 1 {
+
+				state = self.find_the_truth(node.clone(), index + 1, stack.clone());
+
+				if node.borrow().name.len() == 1  {
+					// println!("is alpha {}", head.borrow().name);
 					stack.push(node.borrow().name.clone());
 				}
+				// else {
+				// 	println!("not alpha {}", node.borrow().name);
+				// }
 
-				if let State::Valid = state {
-					valid += 1;
-				} else if let State::Invalid = state {
-					invalid += 1;
-				} else if let State::Undefined = state {
-					println!("Help");
-					invalid += 1;
-					valid += 1;
-				}
+			}
+			else {
+				// println!("name {:?}", node.borrow().name);
+				state = self.get_node_state(node.clone());
+				// println!("state {:?}", state);
+			}
+
+			// println!("----------->  {:?}", stack);
+			if let State::Valid = state {
+				valid += 1;
+			} else if let State::Invalid = state {
+				invalid += 1;
+			} else if let State::Undefined = state {
+				println!("Help");
+				invalid += 1;
+				valid += 1;
 			}
 		}
 		return self.test(head.clone(), valid, invalid);
@@ -269,7 +311,7 @@ impl Node {
 			print!("{}", elem.name.red());
 		}
 	}
-	
+
     pub fn print_node(&self, node:&Rc<RefCell<Node>>, depth:usize)
 	{
 		let elem = node.borrow();
