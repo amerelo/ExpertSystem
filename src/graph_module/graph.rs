@@ -225,7 +225,7 @@ impl Node {
 		let mut valid: i32 = 0;
 		let mut invalid: i32 = 0;
 		let mut stack: Vec<String> = old_stack.clone();
-		let mut state: State = State::Invalid;
+		let mut state: State;
 
 		if head.borrow().name.len() == 1 {
 			stack.push(head.borrow().name.clone());
@@ -317,8 +317,8 @@ impl Node {
 		let elem = node.borrow();
 		if elem.edges.len() > 0 {
 			if depth == 0 {
-				if let Types::Fac(ref Fact) = elem.classe {
-					self.show_fact(Fact);
+				if let Types::Fac(ref fact) = elem.classe {
+					self.show_fact(fact);
 					println!("╗ {:?}", "MEGARULE");
 				}
 			}
@@ -326,8 +326,8 @@ impl Node {
 			for child in elem.edges.iter() {
 				print!(" ");
 				match child.borrow().classe {
-					Types::Fac(ref Fact) => {
-						if (ni == 0)
+					Types::Fac(ref fact) => {
+						if ni == 0
 						{
 							print!("{n:<width$}",n="".blue(),width=(1*depth));
 							print!("╚");
@@ -338,15 +338,15 @@ impl Node {
 							print!(" {n:<width$}",n="".blue(),width=(1*depth));
 							print!("╚═");
 						}
-						self.show_fact(Fact);
+						self.show_fact(fact);
 						println!("");
 					},
 					Types::Rul(ref rule) => {
 						print!("{n:<width$}",n="".blue(),width=(1*depth));
-						if (ni == 0) {
+						if ni == 0 {
 							print!("╚╦═");
 						} else {
-							if (child.borrow().edges.len() > 0) {
+							if child.borrow().edges.len() > 0 {
 								print!(" ╠═");
 							} else {
 								print!(" ╚═");
