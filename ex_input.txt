@@ -2,7 +2,7 @@
 # all the required rules and symbols, along with the bonus ones, will be
 # shown here. spacing is not important
 
-#C + T + R <=> V + F + B
+C + T + R <=> V + F + B
 
 C + T => F
 X + T => F + V
@@ -10,11 +10,11 @@ X + T => F + V
 V + F => T
 F + V => C
 
-#A + V => C
+A + X => V
 
-#C ^ (F | W) + X => E    # C F W | X + ^ >> C Xor F Or W and Not X
-#A + B ^ !C => D      # A and B and C implies D
-#(A | B) + W => C          # A or B implies C
+C ^ (F | W) + X => E    # C F W | X + ^ >> C Xor F Or W and Not X
+A + B ^ !C => D      # A and B and C implies D
+(A | B) + W => C          # A or B implies C
 #V ^ W => X          # V xor W implies X
 
 #A + !B => D         # A and not B implies F
@@ -30,7 +30,7 @@ F + V => C
 #A | B => !C
 #!C => A | B
 
-=CTX  	            # Initial facts : A, B and G are true. All others are false.
+=CT  	            # Initial facts : A, B and G are true. All others are false.
 					# If no facts are initially true, then a simple "=" followed
 					# by a newline is used
 ?FTV               # Queries : What are G, V and X ?
