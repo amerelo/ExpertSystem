@@ -1,4 +1,36 @@
 extern crate colored;
+extern crate structopt;
+#[macro_use]
+extern crate structopt_derive;
+
+use structopt::StructOpt;
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "ExpertSystem", about = "An Expert System Resolver.")]
+struct Opt {
+    /// A flag, true if used in the command line.
+    #[structopt(short = "d", long = "debug", help = "Activate debug mode")]
+    debug: bool,
+
+    #[structopt(short = "a", long = "all", help = "Show All")]
+    showall: bool,
+
+    #[structopt(short = "v", long = "Rules", help = "Show Rules")]
+    showrules: bool,
+
+    /// An argument of type float, with a default value.
+    //#[structopt(short = "s", long = "speed", help = "Set speed", default_value = "42")]
+    //speed: f64,
+
+    /// Needed parameter, the first on the command line.
+    #[structopt(help = "Input file")]
+    input: String,
+
+    // An optional parameter, will be `None` if not present on the
+    // command line.
+    //#[structopt(help = "Output file, stdout if not present")]
+    //output: Option<String>,
+}
 
 mod parser_module;
 mod rpn_module;
@@ -10,8 +42,8 @@ use parser_module::parser::Parser;
 use rpn_module::rpn::Rpn;
 use graph_module::graph::Node;
 use graph_module::graph::Types;
-use std::env;
 use colored::*;
+use std::process;
 
 // fn foo(node: &Node) {
 // 	println!("foo:datnum: {} dattype:{}", node.datum, node.dattype);
@@ -27,17 +59,21 @@ use colored::*;
 // }
 
 pub fn main() {
-    let args: Vec<String> = env::args().collect();
     let mut node: Rc<RefCell<Node>>;
-	//start_node(&*tmp.borrow());
 	let mut data:  Parser = Parser{node: vec![], val_init: vec![], val_search: vec![] };
-
 	if let Err(e) = data.parse() {
-		panic!("Error : {}", e);
+		println!("Error : {}", e);
+        process::exit(1);
 	}
+    let opt = Opt::from_args();
+    //println!("{:?}", opt);
 
+    // if !std::path::Path::new(File::open(opt.input)).exists() {
+    //         println!("Enter valid file !");
+    //         process::exit(1);
+    // }
 
-    if args.len() > 3 {
+    if opt.showall {
         data.input();
         println!("{}", "==========================".cyan());
     }
@@ -47,7 +83,7 @@ pub fn main() {
 	let mut graph: Node = Node{name: "MasterNode".to_string(), classe: Types::None, edges: vec![]};
 	graph.generate(&mut data);
 
-    if args.len() > 2 {
+    if opt.showrules || opt.showall {
         for elem in graph.edges.iter() {
             if data.val_search.contains(&elem.borrow().name) {
                 graph.print_node(elem, 0);

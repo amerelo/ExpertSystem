@@ -2,6 +2,8 @@ use std::io;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
+use std::process;
+use colored::*;
 
 #[derive(Debug)]
 pub struct Node {
@@ -75,7 +77,8 @@ impl Parser
 		line.split("=>").enumerate().for_each(|x|
 			if x.0 == 2 {
 				node.rules = String::from("");
-				panic!("Error more than 2 |=>| in line >  {}", line);
+				println!("Error more than 2 |=>| in line >  {}", line);
+				process::exit(1);
 			}
 			else if x.0 == 0 && Parser::operation_is_valid(& x.1.to_string())
 				{ node.rules = x.1.to_string(); }
@@ -84,7 +87,8 @@ impl Parser
 		);
 
 		if node.rules.len() == 0 || node.facts.len() == 0 {
-				panic!("Error: no argument found");
+				println!("Error: no argument found");
+		        process::exit(1);
 		}
 		self.pars_fact(node);
 	}
@@ -93,7 +97,8 @@ impl Parser
 		line.split("<=>").enumerate().for_each(|x|
 			if x.0 == 2 {
 				node.rules = String::from("");
-				panic!("Error more than 2 |=>| in line >  {}", line);
+				println!("Error more than 2 |=>| in line >  {}", line);
+				process::exit(1);
 			}
 			else if x.0 == 0 && Parser::operation_is_valid(& x.1.to_string())
 				{ node.rules = x.1.to_string(); }
@@ -101,7 +106,8 @@ impl Parser
 				{ node.facts = x.1.to_string(); }
 		);
 		if node.rules.len() == 0 || node.facts.len() == 0 {
-				panic!("Error: no argument found");
+				println!("Error: no argument found");
+				process::exit(1);
 		}
 		node2.rules = node.facts.clone();
 		node2.facts = node.rules.clone();
@@ -159,7 +165,7 @@ impl Parser
 			}
 			return Ok(true);
 		}
-		Err(io::Error::new(io::ErrorKind::Other, "Need file name"))
+		Err(io::Error::new(io::ErrorKind::Other, "Enter valid file !"))
 	}
 
     pub fn input(&self)
@@ -168,13 +174,13 @@ impl Parser
         for elem in self.node.iter() {
             println!("{:?} => {:?}", elem.rules,elem.facts);
         }
-        print!("FACT:");
+        print!("{}","FACT:".green());
         for init_v in self.val_init.iter()
         {
             print!("{} ", init_v);
         }
         println!("");
-		print!("NEED:");
+		print!("{}","NEED:".blue());
         for search_v in self.val_search.iter()
         {
             print!("{} ", search_v);

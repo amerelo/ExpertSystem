@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use parser_module::parser::Parser;
 use parser_module::parser;
 use colored::*;
+use std::process;
 
 #[derive(Debug)]
 pub enum Types {
@@ -88,7 +89,8 @@ impl Node {
 		for fac in elem.facts.chars() {
 			for rul in elem.rules.chars() {
 				if fac.is_alphabetic() && rul.is_alphabetic() && rul == fac{
-					panic!("ERROR: the same elem is as Fact and Rule");
+					println!("ERROR: the same elem is as Fact and Rule");
+					process::exit(1);
 				}
 			}
 		}
@@ -207,7 +209,10 @@ impl Node {
 				rul.state = self.test_rul(&rul.operator, v);
 				return self.test_rul(&rul.operator, v);
 			},
-			Types::None => panic!("Error empty Node"),
+			Types::None => {
+				println!("Error empty Node");
+				process::exit(1);
+			},
 		}
 	}
 
@@ -234,7 +239,10 @@ impl Node {
 					return State::Undefined;
 				}
 			},
-			Types::None => panic!("Error empty Node"),
+			Types::None => {
+				println!("Error empty Node");
+				process::exit(1);
+			},
 		}
 	}
 
