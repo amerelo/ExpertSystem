@@ -143,13 +143,13 @@ impl Parser
 		return true;
 	}
 
-	pub fn parse(&mut self) -> Result<bool, io::Error>
+	pub fn parse(&mut self, filepath:&String) -> Result<bool, io::Error>
 	{
 		let args: Vec<String> = env::args().collect();
 		if args.len() > 1 {
 			let mut contents = String::new();
 			let mut end: Vec<String> = vec![];
-			let mut f = File::open(&args[1])?;
+			let mut f = File::open(filepath)?;
 
 			f.read_to_string(&mut contents)?;
 			let v: Vec<&str> = contents.split('\n').collect();

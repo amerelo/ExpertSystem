@@ -59,13 +59,15 @@ use std::process;
 // }
 
 pub fn main() {
+    let opt = Opt::from_args();
+
     let mut node: Rc<RefCell<Node>>;
-	let mut data:  Parser = Parser{node: vec![], val_init: vec![], val_search: vec![] };
-	if let Err(e) = data.parse() {
+    let mut data:  Parser = Parser{node: vec![], val_init: vec![], val_search: vec![] };
+    if let Err(e) = data.parse(&opt.input) {
 		println!("Error : {}", e);
         process::exit(1);
 	}
-    let opt = Opt::from_args();
+
     //println!("{:?}", opt);
 
     // if !std::path::Path::new(File::open(opt.input)).exists() {

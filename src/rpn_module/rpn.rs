@@ -1,4 +1,5 @@
 use parser_module::parser::Parser;
+use std::process;
 
 pub struct Rpn {
 
@@ -18,7 +19,9 @@ impl Rpn
 			if token.is_alphabetic()
 			{
 				if alphashit > 0 {
-					return String::from("WTF ALPHA");
+					//return String::from("WTF ALPHA");
+					println!("Error : Invalid Input ! Symbol missing");
+					process::exit(1);
 				}
 				alphashit += 1;
 				opshit = 0;
@@ -42,7 +45,8 @@ impl Rpn
 					alphashit = 0;
 				}
 				if opshit > 0 && !token.eq(&'!') {
-					return String::from("WTF OPERAND");
+					println!("Error : Invalid Input ! too many symbol");
+					process::exit(1);
 				}
 				opshit += 1;
 				while opstack.len() > 0 && opprec(peekop(&opstack)) >= opprec(token) {
