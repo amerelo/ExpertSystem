@@ -147,6 +147,23 @@ impl Node {
 			self.init_rules(elem);
 		}
 
+		for val in data.val_init.iter() {
+			if self.is_not_in_edges(&self.edges, &val.chars().nth(0).unwrap() ) {
+				let tmp = Node::new(val.clone() , Types::Fac(Fact{name: val.clone(), valid: true, invalid: false} ) );
+				self.edges.push(tmp);
+			}
+		}
+
+		for val in data.val_search.iter() {
+			if self.is_not_in_edges(&self.edges, &val.chars().nth(0).unwrap() ) {
+				let tmp = Node::new(val.clone() , Types::Fac(Fact{name: val.clone(), valid: false, invalid: true} ) );
+				self.edges.push(tmp);
+			}
+		}
+
+		// let tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone(), state: State::None } ));
+
+
 		self.start_node(data);
 	}
 
@@ -280,6 +297,8 @@ impl Node {
 	{
 		//println!("len {:?}", self.edges.len());
 		//println!("data |-:|.|:-| {:?} --- {:?} ", data.val_init , data.val_search);
+
+
 
 		// init as true
 		for elem in self.edges.iter() {

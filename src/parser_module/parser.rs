@@ -34,7 +34,7 @@ impl Parser
 	{
 		for val in line.chars() {
 			if !val.is_alphabetic() && !val.is_whitespace() &&
-				val != '+' && val != '(' && val != ')' && val != '!'
+				val != '+' && val != '(' && val != ')'// && val != '!'
 			{
 				println!("Error bad value {} in line {}", val, line);
 				return false;
@@ -79,7 +79,7 @@ impl Parser
 			}
 			else if x.0 == 0 && Parser::operation_is_valid(& x.1.to_string())
 				{ node.rules = x.1.to_string(); }
-			else if x.0 == 1 && Parser::operation_is_valid(& x.1.to_string())
+			else if x.0 == 1 && Parser::operation_is_valid_fac(& x.1.to_string())
 				{ node.facts = x.1.to_string(); }
 		);
 
@@ -95,7 +95,7 @@ impl Parser
 				node.rules = String::from("");
 				panic!("Error more than 2 |=>| in line >  {}", line);
 			}
-			else if x.0 == 0 && Parser::operation_is_valid_fac(& x.1.to_string())
+			else if x.0 == 0 && Parser::operation_is_valid(& x.1.to_string())
 				{ node.rules = x.1.to_string(); }
 			else if x.0 == 1 && Parser::operation_is_valid_fac(& x.1.to_string())
 				{ node.facts = x.1.to_string(); }
