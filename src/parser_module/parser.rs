@@ -161,4 +161,18 @@ impl Parser
 		}
 		Err(io::Error::new(io::ErrorKind::Other, "Need file name"))
 	}
+    
+    pub fn input(&self)
+    {
+       // println!("node => {:?}", self.node);
+        for elem in self.node.iter() {
+            println!("{:?} => {:?}", elem.rules,elem.facts);
+        }
+        print!("FACT:");
+        for init_v in self.val_init.iter()
+        {
+            print!("{} ", init_v);
+        }
+        println!("");
+    }
 }
