@@ -147,6 +147,23 @@ impl Node {
 			self.init_rules(elem);
 		}
 
+		for val in data.val_init.iter() {
+			if self.is_not_in_edges(&self.edges, &val.chars().nth(0).unwrap() ) {
+				let tmp = Node::new(val.clone() , Types::Fac(Fact{name: val.clone(), valid: true, invalid: false} ) );
+				self.edges.push(tmp);
+			}
+		}
+
+		for val in data.val_search.iter() {
+			if self.is_not_in_edges(&self.edges, &val.chars().nth(0).unwrap() ) {
+				let tmp = Node::new(val.clone() , Types::Fac(Fact{name: val.clone(), valid: false, invalid: true} ) );
+				self.edges.push(tmp);
+			}
+		}
+
+		// let tmp = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: rule.to_string().clone(), state: State::None } ));
+
+
 		self.start_node(data);
 	}
 
@@ -281,6 +298,8 @@ impl Node {
 		//println!("len {:?}", self.edges.len());
 		//println!("data |-:|.|:-| {:?} --- {:?} ", data.val_init , data.val_search);
 
+
+
 		// init as true
 		for elem in self.edges.iter() {
 			if data.val_init.contains(&elem.borrow().name) {
@@ -296,11 +315,11 @@ impl Node {
 			self.search_in_graph(value);
 		}
 
-		for elem in self.edges.iter() {
-			if data.val_search.contains(&elem.borrow().name) {
-				self.print_node(elem, 0);
-			}
-		}
+		// for elem in self.edges.iter() {
+		// 	if data.val_search.contains(&elem.borrow().name) {
+		// 		self.print_node(elem, 0);
+		// 	}
+		// }
 	}
 
 	pub fn show_fact(&self, elem: &Fact)
