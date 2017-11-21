@@ -246,7 +246,7 @@ impl Node {
 		}
 	}
 
-	fn find_ßthe_truth(&self, head: Rc<RefCell<Node>>, index: i32, old_stack: Vec<String>) -> State {
+	fn find_the_truth(&self, head: Rc<RefCell<Node>>, index: i32, old_stack: Vec<String>) -> State {
 		let mut valid: i32 = 0;
 		let mut invalid: i32 = 0;
 		let mut stack: Vec<String> = old_stack.clone();
