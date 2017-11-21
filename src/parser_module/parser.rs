@@ -36,7 +36,7 @@ impl Parser
 	{
 		for val in line.chars() {
 			if !val.is_alphabetic() && !val.is_whitespace() &&
-				val != '+' && val != '(' && val != ')'// && val != '!'
+				val != '+' && val != '(' && val != ')' && val != '!'
 			{
 				println!("Error bad value {} in line {}", val, line);
 				return false;
@@ -63,11 +63,22 @@ impl Parser
 
 
 	fn pars_fact(&mut self, node: &mut Node) {
+		let mut negatif: bool = false;
+
 		for elem in node.facts.chars() {
 			let mut lastnode: Node = Node{ rules: String::from(""), facts: String::from("") };
 			lastnode.rules = node.rules.clone();
+
+			if elem == '!' {
+				negatif = true;
+			}
 			if elem.is_alphabetic() {
-				lastnode.facts = elem.to_string().clone();
+				if negatif == true {
+					lastnode.facts = '!'.to_string();
+					negatif = false;
+				}
+				lastnode.facts.push_str(&elem.to_string().clone());
+				// println!("last node{:?}", lastnode.facts);
 				self.node.push(lastnode);
 			}
 		}

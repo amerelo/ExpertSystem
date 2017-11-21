@@ -94,7 +94,6 @@ impl Node {
 				}
 			}
 		}
-		// println!("self {:?}", self);
 	}
 
 	pub fn constructor(&mut self, mut stack: &mut Vec<Rc<RefCell<Node>>> , new_node: Rc<RefCell<Node>>) {
@@ -134,11 +133,21 @@ impl Node {
 
 	pub fn init_rules(&mut self, elem: &parser::Node) {
 		let new_rule = self.gen_rule(&elem.rules);
+		let mut negatif: bool = false;
 
-		for fact in elem.facts.chars() {
+		for fact in elem.facts.chars().rev() {
+			if fact == '!' { negatif = true; }
 			if fact.is_alphabetic() {
 				let current_fact = self.get_node_by_name(fact.to_string());
-				current_fact.borrow_mut().edges.push(new_rule.clone());
+				if negatif == true {
+					let negative_node = Node::new(String::from("Operator") , Types::Rul( Rule{ operator: "-".to_string() , state: State::Valid } ));
+					negative_node.borrow_mut().edges.push(new_rule.clone());
+					current_fact.borrow_mut().edges.push(negative_node);
+					negatif = false;
+				}
+				else {
+					current_fact.borrow_mut().edges.push(new_rule.clone());
+				}
 			}
 		}
 	}
@@ -196,6 +205,8 @@ impl Node {
 			if v == 1 { return State::Valid; } else { return State::Invalid; }
 		} else if "!" == rule {
 			if v == 1 { return State::Invalid; } else { return State::Valid; }
+		} else if "-" == rule {
+			return State::Invalid;
 		}
 
 		return State::None;
@@ -305,9 +316,6 @@ impl Node {
 	{
 		//println!("len {:?}", self.edges.len());
 		//println!("data |-:|.|:-| {:?} --- {:?} ", data.val_init , data.val_search);
-
-
-
 		// init as true
 		for elem in self.edges.iter() {
 			if data.val_init.contains(&elem.borrow().name) {

@@ -2,25 +2,12 @@
 # all the required rules and symbols, along with the bonus ones, will be
 # shown here. spacing is not important
 
-C + T + R <=> V + F + B
+A + B => C
 
-C + T => F
-X + T => F + V
+A + B => !C
 
-V + F => T
-F + V => C
-
-A + X => V
-
-C ^ (F | W) + X => E    # C F W | X + ^ >> C Xor F Or W and Not X
-A + B ^ !C => D      # A and B and C implies D
-(A | B) + W => C          # A or B implies C
-#V ^ W => X          # V xor W implies X
-
-#A + !B => D         # A and not B implies F
 #A + B | R => Y + Z
 #A + B | Y + Z => R
-
 #C | !G => H         # C or not G implies H
 #A + B => Y + Z | R     # A and B implies Y and Z
 #C | D => X | V      # C or D implies X or V
@@ -30,10 +17,10 @@ A + B ^ !C => D      # A and B and C implies D
 #A | B => !C
 #!C => A | B
 
-=CT  	            # Initial facts : A, B and G are true. All others are false.
+=AB  	            # Initial facts : A, B and G are true. All others are false.
 					# If no facts are initially true, then a simple "=" followed
 					# by a newline is used
-?FTV               # Queries : What are G, V and X ?
+?ABC               # Queries : What are G, V and X ?
 
 #===================
 #
