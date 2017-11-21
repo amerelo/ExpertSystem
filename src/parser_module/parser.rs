@@ -87,8 +87,8 @@ impl Parser
 		);
 
 		if node.rules.len() == 0 || node.facts.len() == 0 {
-				println!("Error: no argument found");
-		        process::exit(1);
+			println!("Error: no argument found");
+			process::exit(1);
 		}
 		self.pars_fact(node);
 	}
@@ -150,7 +150,6 @@ impl Parser
 			let mut contents = String::new();
 			let mut end: Vec<String> = vec![];
 			let mut f = File::open(filepath)?;
-
 			f.read_to_string(&mut contents)?;
 			let v: Vec<&str> = contents.split('\n').collect();
 			for lm in v {
@@ -168,24 +167,23 @@ impl Parser
 		Err(io::Error::new(io::ErrorKind::Other, "Enter valid file !"))
 	}
 
-    pub fn input(&self)
-    {
-       // println!("node => {:?}", self.node);
-        for elem in self.node.iter() {
-            println!("{:?} => {:?}", elem.rules,elem.facts);
-        }
-        print!("{}","FACT:".green());
-        for init_v in self.val_init.iter()
-        {
-            print!("{} ", init_v);
-        }
-        println!("");
+	pub fn input(&self)
+	{
+		// println!("node => {:?}", self.node);
+		for elem in self.node.iter() {
+			println!("{:?} => {:?}", elem.rules,elem.facts);
+		}
+		print!("{}","FACT:".green());
+		for init_v in self.val_init.iter()
+		{
+			print!("{} ", init_v);
+		}
+		println!("");
 		print!("{}","NEED:".blue());
-        for search_v in self.val_search.iter()
-        {
-            print!("{} ", search_v);
-        }
-        println!("");
-
-    }
+		for search_v in self.val_search.iter()
+		{
+			print!("{} ", search_v);
+		}
+		println!("");
+	}
 }
