@@ -195,16 +195,24 @@ impl Node {
 		return State::None;
 	}
 
-	fn test_rul(&self, rule: &String, v: i32) -> State {
+	fn test_rul(&self, rule: &String, v: i32, inv: i32) -> State {
 
 		if "+" == rule {
-			if v == 2 {	return State::Valid; } else { return State::Invalid; }
+			if v == 2 && inv == 0 {	return State::Valid; }
+			else if v + inv > 2{	return State::Undefined; }
+			else { return State::Invalid; }
 		} else if "|" == rule {
-			if v > 0 { return State::Valid; } else { return State::Invalid; }
+			if v > 0 && inv < 2 { return State::Valid; }
+			if v == 2 && inv == 2 { return State::Undefined; }
+			else { return State::Invalid; }
 		} else if "^" == rule {
-			if v == 1 { return State::Valid; } else { return State::Invalid; }
+			if v == 1 && inv == 0 { return State::Valid; }
+			else if v > 0 && inv > 0 { return State::Undefined; }
+			else { return State::Invalid; }
 		} else if "!" == rule {
-			if v == 1 { return State::Invalid; } else { return State::Valid; }
+			if v == 1 && inv == 0{ return State::Invalid; }
+			else if v > 0 && inv > 0{ return State::Undefined; }
+			else { return State::Valid; }
 		} else if "-" == rule {
 			return State::Invalid;
 		}
@@ -217,8 +225,8 @@ impl Node {
 		match node.borrow_mut().classe {
 			Types::Fac(ref mut fac) => return self.test_fact(fac, v, inv),
 			Types::Rul(ref mut rul) => {
-				rul.state = self.test_rul(&rul.operator, v);
-				return self.test_rul(&rul.operator, v);
+				rul.state = self.test_rul(&rul.operator, v, inv);
+				return self.test_rul(&rul.operator, v, inv);
 			},
 			Types::None => {
 				println!("Error empty Node");
