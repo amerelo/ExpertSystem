@@ -1,3 +1,6 @@
+#! /bin/bash
+source $HOME/.cargo/env
+
 for file in $1/**.t
 do
 	echo $file

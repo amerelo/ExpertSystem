@@ -180,14 +180,13 @@ impl Node {
 
 	fn test_fact(&self, fact: &mut Fact, v: i32, inv: i32) -> State
 	{
-		// println!("fact {:?} v {}", fact, v);
 		if (v > 0 && inv == 0) || (fact.valid && !fact.invalid) {
 			fact.valid = true;
 			return State::Valid;
 		} else if (inv > 0 && v == 0) || (!fact.valid && fact.invalid) {
 			fact.invalid = true;
 			return State::Invalid;
-		} else if (inv > 0 && v > 0) || (fact.valid && fact.invalid){
+		} else if (inv > 0 && v > 0) || (fact.valid && fact.invalid) {
 			fact.valid = true;
 			fact.invalid = true;
 			return State::Undefined;
@@ -198,17 +197,17 @@ impl Node {
 	fn test_rul(&self, rule: &String, v: i32, inv: i32) -> State {
 
 		if "+" == rule {
-			if v == 2 && inv == 0 {	return State::Valid; }
-			else if v + inv > 2{	return State::Undefined; }
-			else { return State::Invalid; }
+			if v == 2 && inv == 0 { return State::Valid; }
+			else if v + inv > 2{ return State::Undefined; }
+			// else { return State::Invalid; }
 		} else if "|" == rule {
 			if v > 0 && inv < 2 { return State::Valid; }
 			if v == 2 && inv == 2 { return State::Undefined; }
-			else { return State::Invalid; }
+			// else { return State::Invalid; }
 		} else if "^" == rule {
 			if v == 1 && inv == 0 { return State::Valid; }
 			else if v > 0 && inv > 0 { return State::Undefined; }
-			else { return State::Invalid; }
+			// else { return State::Invalid; }
 		} else if "!" == rule {
 			if v == 1 && inv == 0{ return State::Invalid; }
 			else if v > 0 && inv > 0{ return State::Undefined; }
@@ -348,6 +347,7 @@ impl Node {
 
 	pub fn show_fact(&self, elem: &Fact)
 	{
+		// println!("v {:?} , f {:?}", elem.valid,  elem.invalid);
 		if elem.valid == true  && elem.invalid == false {
 			print!("{}", elem.name.green());
 		} else if elem.valid == true && elem.invalid == true {
@@ -409,7 +409,7 @@ impl Node {
 							println!("{}[{}]", op.cyan(), rule.operator.cyan());
 						},
 						State::None => {
-							println!("{}[{}]", op.blue(), rule.operator.blue());
+							println!("{}[{}]", op.red(), rule.operator.red());
 						}
 					}
 					self.print_node(&child, depth + 1);
